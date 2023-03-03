@@ -12,7 +12,7 @@ mixer.init()
 
 
 def beginner():
-    create_shelves(10, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    create_shelves(10, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
     map.add_skulls_to_tiles()
 
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
@@ -22,7 +22,7 @@ def beginner():
 
 
 def advanced():
-    create_shelves(15, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    create_shelves(15, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
     map.add_skulls_to_tiles()
 
     mixer.music.load("music\\Geometry Dash - Level Seven Closed Eyes.mp3")
@@ -32,7 +32,7 @@ def advanced():
 
 
 def extreme_level():
-    create_shelves(15, map.get_tiles(), 3, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    create_shelves(15, map.get_tiles(), DEFAULT_SHELF_LENGTH - 1, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
     map.add_skulls_to_tiles()
 
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
@@ -50,7 +50,8 @@ pygame.display.flip()
 
 map = Map()
 map.add_furniture("Chandelier")
-create_shelves(10, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+map.add_furniture("Mushroom")
+create_shelves(10, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
 
 
 def create_menu():
@@ -63,6 +64,7 @@ def create_menu():
     generate_menu(screen, MENU_COLS, MENU_ROWS)
     rects = initiate_menu(screen)
     time = 0
+    text = ""
 
     while not clicked:  # Menu screen
         clock.tick(FPS)
@@ -84,6 +86,10 @@ def create_menu():
                     map.update_difficulty(3)
                     text = extreme_level()
                     clicked = True
+
+                if clicked:
+                    map.add_furniture("Chandelier")
+                    map.add_furniture("Mushroom")
 
         if time % 25 == 0:
             update_menu_colors(screen, MENU_COLS, MENU_ROWS)
@@ -181,6 +187,7 @@ while run and not finished:
         map.update_tiles()
         draw_map(map.get_tiles(), screen, (Camera.x, Camera.y))
         map.add_furniture("Chandelier")
+        map.add_furniture("Mushroom")
         character_src = pygame.image.load("Characters/Character\\cube.png")
         character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
         character = BasicCharacter(character_src, character.getX(), character.getY())
@@ -212,6 +219,7 @@ while run and not finished:
         map.update_tiles()
         draw_map(map.get_tiles(), screen, (Camera.x, Camera.y))
         map.add_furniture("Chandelier")
+        map.add_furniture("Mushroom")
         character_src = pygame.image.load("Characters/Character\\cube.png")
         character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
         character = BasicCharacter(character_src, character.getX(), character.getY())

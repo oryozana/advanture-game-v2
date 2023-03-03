@@ -24,8 +24,9 @@ class Map:
     def add_furniture(self, furniture_name):
         match furniture_name:
             case "Chandelier":
-                Furniture.create_chandeliers(CHANDELIER_AMOUNT, CHANDELIER_SPACE, self.tiles, "SI", "G",
-                                             CHANDELIER_START_POINT, CELLING_HEIGHT)
+                Furniture.create_chandeliers(CHANDELIER_AMOUNT, CHANDELIER_SPACE, self.tiles, "SI", "G", CHANDELIER_START_POINT, CELLING_HEIGHT)
+            case "Mushroom":
+                Furniture.create_mushrooms(MUSHROOM_AMOUNT, MUSHROOM_SPACE, self.tiles, "CM", "SM", MUSHROOM_START_POINT, FLOOR_HEIGHT)
 
     def add_skulls_to_tiles(self):
         skulls_list = []
@@ -97,9 +98,9 @@ def write_map(map_name, rows, cols, difficulty):  # create a basic editable text
         for col in range(cols):
             if row == 0 or row == rows - 1 or col == 0 or col == cols - 1:
                 f.write("X ")
-            elif col == FLOOR_HEIGHT and random.randint(0, BASIC_SPAWN_RATE - difficulty) == 0:
+            elif col == FLOOR_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
                 f.write("S ")
-            elif col == CELLING_HEIGHT and random.randint(0, BASIC_SPAWN_RATE - difficulty) == 0:
+            elif col == CELLING_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
                 f.write("RS ")
             elif col == (CELLING_HEIGHT + FLOOR_HEIGHT) // 2 and 0 < row < SUPPORT_SHELF_LENGTH:
                 f.write("R ")

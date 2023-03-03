@@ -65,16 +65,22 @@ END_POINT = MAP_ROWS - 25
 
 # Shelf:
 SHELF_HEIGHT_DIFF = int(JUMP // 2) + 1
+DEFAULT_SHELF_HEIGHT = 15
 SUPPORT_SHELF_LENGTH = 11
-SHELF_LENGTH = 15
+DEFAULT_SHELF_LENGTH = 4
 
 # Chandelier:
 CHANDELIER_AMOUNT = 3
 CHANDELIER_SPACE = MAP_ROWS // CHANDELIER_AMOUNT + random.randint(-10, 10)
 CHANDELIER_START_POINT = random.randint(START_POINT, MAP_ROWS + (MAP_ROWS - END_POINT) - (CHANDELIER_SPACE * (CHANDELIER_AMOUNT - 1)))
 
+# Mushroom:
+MUSHROOM_AMOUNT = 3
+MUSHROOM_SPACE = MAP_ROWS // MUSHROOM_AMOUNT + random.randint(-10, 10)
+MUSHROOM_START_POINT = random.randint(START_POINT, MAP_ROWS + (MAP_ROWS - END_POINT) - (MUSHROOM_SPACE * (MUSHROOM_AMOUNT - 1)))
+
 # Traps:
-BASIC_SPAWN_RATE = 4
+DEFAULT_TRAP_SPAWN_RATE = 4
 
 # Tiles:
 ALL_COLORS = {"R": pygame.image.load("Colors\\rust.png"),
@@ -82,12 +88,20 @@ ALL_COLORS = {"R": pygame.image.load("Colors\\rust.png"),
               "X": pygame.image.load("Colors\\brick_wall.png"),
               "G": pygame.image.load("Colors\\gold.png"),
               "SI": pygame.image.load("Colors\\silver.png"),
-              "SK": pygame.image.load("Colors\\skull.png")}
+              "SK": pygame.image.load("Colors\\skull.png"),
+              "HM": pygame.image.load("Colors\\mushroom_hand.png"),
+              "CM": pygame.image.load("Colors\\mushroom_cap_color.png"),
+              "SM": pygame.image.load("Colors\\mushroom_secondary_color.png"),
+              "EM": pygame.image.load("Colors\\mushroom_eye.png")}
 
 BASIC_COLORS = {"W": pygame.image.load("Colors\\white.png"),
                 "G": pygame.image.load("Colors\\gold.png"),
                 "SI": pygame.image.load("Colors\\silver.png"),
-                "SK": pygame.image.load("Colors\\skull.png")}
+                "SK": pygame.image.load("Colors\\skull.png"),
+                "HM": pygame.image.load("Colors\\mushroom_hand.png"),
+                "CM": pygame.image.load("Colors\\mushroom_cap_color.png"),
+                "SM": pygame.image.load("Colors\\mushroom_secondary_color.png"),
+                "EM": pygame.image.load("Colors\\mushroom_eye.png")}
 
 COLLIDER_COLORS = {"X": pygame.image.load("Colors\\brick_wall.png"),
                    "R": pygame.image.load("Colors\\rust.png")}
