@@ -1,5 +1,6 @@
 import pygame.transform
 import Constants
+import Furniture
 from Tiles.BasicTile import *
 from Tiles.CollideTile import *
 from Tiles.CollideTile import CollideTile
@@ -7,63 +8,6 @@ from Tiles.ObstacleTile import *
 from Tiles.OptionTile import *
 import Camera
 import random  # random.randint(1, 10)
-
-
-# Map:
-def write_map(map_name, rows, cols):  # create a basic editable text file with a basic map
-    f = open(map_name, "w")
-    for row in range(rows):
-        for col in range(cols):
-            if row == 0 or row == rows - 1 or col == 0 or col == cols - 1:
-                f.write("X ")
-            elif col == FLOOR_HEIGHT and random.randint(0, 5) == 0:
-                f.write("S ")
-            elif col == CELLING_HEIGHT and random.randint(0, 5) == 0:
-                f.write("RS ")
-            else:
-                f.write("W ")
-        f.write("\n")
-    f.close()  # write_map("map.txt", MAP_ROWS, MAP_COLS)
-
-
-def read_map():  # read the .txt map and return it
-    world = []
-    f = open("map.txt", "r")
-    for line in f:
-        line = line.replace("\n", "")
-        world.append(line.split(" "))
-    f.close()
-    return world
-
-
-def draw_map(tiles, screen, camera_origin):  # make the tiles list (based map) apper on the screen
-    for row in range(MAP_ROWS):
-        for col in range(MAP_COLS):
-            tile = tiles[row][col]
-            pygame.transform.scale(tile.getImgSrc(), (SCALE, SCALE))
-            camera_x, camera_y = camera_origin
-            screen.blit(tile.getImgSrc(), (tile.getX() * Constants.SCALE - camera_x, tile.getY() * Constants.SCALE - camera_y))
-
-
-# Tiles:
-def generate_tiles(map):  # create the tiles based of the map
-    tiles = []
-    for row in range(Constants.MAP_ROWS):
-        new_line = []
-        for col in range(Constants.MAP_COLS):
-            for color in Constants.BASIC_COLORS:
-                if map[row][col] == color:
-                    new_line.append(BasicTile(Constants.BASIC_COLORS[color], row, col))
-
-            for color in Constants.COLLIDER_COLORS:
-                if map[row][col] == color:
-                    new_line.append(CollideTile(Constants.COLLIDER_COLORS[color], row, col))
-
-            for color in Constants.OBSTACLE_COLORS:
-                if map[row][col] == color:
-                    new_line.append(ObstacleTile(Constants.OBSTACLE_COLORS[color], row, col))
-        tiles.append(new_line)
-    return tiles
 
 
 # Menu:
@@ -137,6 +81,23 @@ def isWalkable(tiles, row, col):  # is possible to move through the tile
 
 def isKilled(tiles, row, col):  # is touch this tile will kill you
     return tiles[row][col].isKillable()
+
+
+def isGonnaBeKilled(character, jumping, falling, tiles):
+    killed = isKilled(tiles, character.getX() + 1, character.getY()) and not jumping
+    gonna_be_killed = False
+
+    if character.type() == "B":
+        if isKilled(tiles, character.getX() + 1, character.getY() + 1) and falling:
+            gonna_be_killed = True
+            killed = True
+
+    elif character.type() == "R":
+        if isKilled(tiles, character.getX() + 1, character.getY() - 1) and falling:
+            gonna_be_killed = True
+            killed = True
+
+    return killed, gonna_be_killed
 
 
 def kill_character(character):

@@ -1,3 +1,5 @@
+import random
+
 import pygame as pygame
 import pygame.image
 
@@ -10,6 +12,8 @@ MAP_ROWS = 200  # normal: 350, after change use write_map("map.txt", MAP_ROWS, M
 MAP_COLS = 25  # normal: 25, after change use write_map("map.txt", MAP_ROWS, MAP_COLS)
 CELLING_HEIGHT = 1  # use as col
 FLOOR_HEIGHT = MAP_COLS - 2  # use as col
+MIDDLE_HEIGHT = (CELLING_HEIGHT + FLOOR_HEIGHT) // 2  # Use as col
+MAP_END = MAP_ROWS - 2
 
 # levels:
 Y_TEXT_POS = FLOOR_HEIGHT - 20
@@ -55,16 +59,35 @@ CHARACTER_WIDTH = 20
 CAMERA_X_START = ((SCREEN_WIDTH - 2) // SCALE) // 3
 CAMERA_X_END = MAP_ROWS - SCREEN_WIDTH // SCALE
 
+# Furniture:
+START_POINT = 25
+END_POINT = MAP_ROWS - 25
+
 # Shelf:
 SHELF_HEIGHT_DIFF = int(JUMP // 2) + 1
+SUPPORT_SHELF_LENGTH = 11
 SHELF_LENGTH = 15
+
+# Chandelier:
+CHANDELIER_AMOUNT = 3
+CHANDELIER_SPACE = MAP_ROWS // CHANDELIER_AMOUNT + random.randint(-10, 10)
+CHANDELIER_START_POINT = random.randint(START_POINT, MAP_ROWS + (MAP_ROWS - END_POINT) - (CHANDELIER_SPACE * (CHANDELIER_AMOUNT - 1)))
+
+# Traps:
+BASIC_SPAWN_RATE = 4
 
 # Tiles:
 ALL_COLORS = {"R": pygame.image.load("Colors\\rust.png"),
               "W": pygame.image.load("Colors\\white.png"),
-              "X": pygame.image.load("Colors\\brick_wall.png")}
+              "X": pygame.image.load("Colors\\brick_wall.png"),
+              "G": pygame.image.load("Colors\\gold.png"),
+              "SI": pygame.image.load("Colors\\silver.png"),
+              "SK": pygame.image.load("Colors\\skull.png")}
 
-BASIC_COLORS = {"W": pygame.image.load("Colors\\white.png")}
+BASIC_COLORS = {"W": pygame.image.load("Colors\\white.png"),
+                "G": pygame.image.load("Colors\\gold.png"),
+                "SI": pygame.image.load("Colors\\silver.png"),
+                "SK": pygame.image.load("Colors\\skull.png")}
 
 COLLIDER_COLORS = {"X": pygame.image.load("Colors\\brick_wall.png"),
                    "R": pygame.image.load("Colors\\rust.png")}

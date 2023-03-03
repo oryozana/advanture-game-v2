@@ -8,10 +8,10 @@ class ReversedCharacter(Character):
     def __init__(self, img_src, x, y):
         super().__init__(img_src, x, y)
 
-    def movement(self, map, tiles, camera_end, jumping, jump_counter, falling):
+    def movement(self, map, camera_end, jumping, jump_counter, falling):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
-            if isWalkable(tiles, self.x, self.y + JUMP) and not jumping:  # start the jump and avoid double jump
+            if isWalkable(map.get_tiles(), self.x, self.y + JUMP) and not jumping:  # start the jump and avoid double jump
                 jumping = True
                 jump_counter = JUMP
 
@@ -23,17 +23,17 @@ class ReversedCharacter(Character):
                 jumping = False
                 jump_counter = 0
 
-        if not self.onGround(tiles) and not jumping:  # make the character fall to the ground
+        if not self.onGround(map.get_tiles()) and not jumping:  # make the character fall to the ground
             self.y -= GRAVITY
             jump_counter = 0
             falling = True
 
-        if self.onGround(tiles):  # turn off the fall system when touched the ground
+        if self.onGround(map.get_tiles()):  # turn off the fall system when touched the ground
             falling = False
 
         # make the character move forward
         for x in range(self.actualX + 1, self.actualX + 1 + SPEED):
-            if not isWalkable(tiles, x, self.y):
+            if not isWalkable(map.get_tiles(), x, self.y):
                 self.actualX = x - 1
                 break
         else:

@@ -1,5 +1,6 @@
 from Constants import *
 import Functions
+import Map
 
 
 class Camera:
@@ -10,7 +11,7 @@ class Camera:
         pass
 
     def __draw_map(screen, tiles):
-        Functions.draw_map(tiles, screen, (Camera.x, Camera.y))
+        Map.draw_map(tiles, screen, (Camera.x, Camera.y))
 
     def __draw_player(screen, character):
         screen.blit(character.getImageSrc(), (character.getX() * SCALE - Camera.x, character.getY() * SCALE - Camera.y))

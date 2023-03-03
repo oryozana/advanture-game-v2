@@ -7,11 +7,14 @@ from Characters.BasicCharacter import *
 from Characters.ReversedCharacter import *
 from Furniture import *
 from Camera import *
+from Map import *
 mixer.init()
 
 
 def beginner():
-    create_shelves(10, tiles, 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    create_shelves(10, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    map.add_skulls_to_tiles()
+
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
@@ -19,15 +22,19 @@ def beginner():
 
 
 def advanced():
-    create_shelves(15, tiles, 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
-    mixer.music.load("music\\Geometry Dash - Polargeist All Coins.mp3")
+    create_shelves(15, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    map.add_skulls_to_tiles()
+
+    mixer.music.load("music\\Geometry Dash - Level Seven Closed Eyes.mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
     return "This is the advanced level good luck my friend"
 
 
 def extreme_level():
-    create_shelves(15, tiles, 3, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    create_shelves(15, map.get_tiles(), 3, "R", SHELF_LENGTH, int(MAP_COLS // 2))
+    map.add_skulls_to_tiles()
+
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
@@ -40,14 +47,17 @@ screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 screen = pygame.display.set_mode(screen_size)
 pygame.display.set_caption("Adventure_game")
 pygame.display.flip()
-map = read_map()
-tiles = generate_tiles(map)
+
+map = Map()
+map.add_furniture("Chandelier")
+create_shelves(10, map.get_tiles(), 4, "R", SHELF_LENGTH, int(MAP_COLS // 2))
 
 
 def create_menu():
     mixer.music.load("music\\ELECTROMAN ADVENTURES FULL VERSION GEOMETRY DASH 2.11.mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
+
     run = True
     clicked = False
     generate_menu(screen, MENU_COLS, MENU_ROWS)
@@ -63,21 +73,22 @@ def create_menu():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
                 if mouse_in_button(rects[0], mouse_pos):
+                    map.update_difficulty(1)
                     text = beginner()
-                    difficulty = 1
                     clicked = True
                 elif mouse_in_button(rects[1], mouse_pos):
+                    map.update_difficulty(2)
                     text = advanced()
-                    difficulty = 2
                     clicked = True
                 elif mouse_in_button(rects[2], mouse_pos):
+                    map.update_difficulty(3)
                     text = extreme_level()
-                    difficulty = 3
                     clicked = True
+
         if time % 25 == 0:
             update_menu_colors(screen, MENU_COLS, MENU_ROWS)
         time += 1
-    return rects, text, difficulty, run
+    return rects, text, run
 
 
 def create_options():
@@ -101,7 +112,7 @@ def create_options():
                 clicked = True
 
 
-rects, text, difficulty, run = create_menu()
+rects, text, run = create_menu()
 character_src = pygame.image.load("Characters/Character\\cube.png")  # / - Folder, \\ - File
 character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
 character = BasicCharacter(character_src, X_POSITION, Y_POSITION)
@@ -128,7 +139,13 @@ while run and not finished:
     if keys[pygame.K_o]:
         create_options()
 
+    just_changed = False
+    just_changed_from = character.type()
+
     if changeable and keys[pygame.K_r]:
+        just_changed = True
+        just_changed_from = character.type()
+
         if character.type() == "B":
             character_src = pygame.image.load("Characters/Character\\cubeReversed.png")
             character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
@@ -141,36 +158,84 @@ while run and not finished:
             character = BasicCharacter(character_src, character.getX(), character.getY())
             changeable = False
 
-    camera_end, jumping, jump_counter, falling = character.movement(map, tiles, camera_end, jumping, jump_counter, falling)
+    killed, gonna_be_killed = isGonnaBeKilled(character, jumping, falling, map.get_tiles())
 
-    if character.getX() == MAP_ROWS - 2:
-        difficulty = next_level(difficulty)
+    if killed or gonna_be_killed:
+        if just_changed:
+            match just_changed_from:
+                case "B":
+                    character = BasicCharacter(character_src, character.getX(), character.getY())
+                case "R":
+                    character = ReversedCharacter(character_src, character.getX(), character.getY())
 
-    if isKilled(tiles, character.getX(), character.getY()) or character.getX() == MAP_ROWS - 2 or keys[pygame.K_ESCAPE]:
+        if killed and not gonna_be_killed:
+            if character.type() == "B":
+                killed_location = (character.getX() + 1, character.getY() - 2)
+            elif character.type() == "R":
+                killed_location = (character.getX() + 1, character.getY())
+
+        elif gonna_be_killed:
+            killed_location = (character.getX() + 1, character.getY() - 1)
+
         kill_character(character)
-        tiles = generate_tiles(map)
-        draw_map(tiles, screen, (Camera.x, Camera.y))
+        map.update_tiles()
+        draw_map(map.get_tiles(), screen, (Camera.x, Camera.y))
+        map.add_furniture("Chandelier")
         character_src = pygame.image.load("Characters/Character\\cube.png")
         character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
         character = BasicCharacter(character_src, character.getX(), character.getY())
         changeable = True
-        if difficulty == 1:
+
+        map.add_skull(character.type(), killed_location)
+
+        if map.get_difficulty() == 1:
             text = beginner()
-        elif difficulty == 2:
+        elif map.get_difficulty() == 2:
             text = advanced()
-        elif difficulty == 3:
+        elif map.get_difficulty() == 3:
             text = extreme_level()
+
         counter = 0
         add_text(screen, text, TEXT_COLOR, X_TEXT_POS, Y_TEXT_POS)
-    if not changeable:
-        changeable = character.onGround(tiles)
 
-    if difficulty == 4:
+    if not killed:
+        camera_end, jumping, jump_counter, falling = character.movement(map, camera_end, jumping, jump_counter, falling)
+    else:
+        gonna_be_killed = False
+        killed = False
+
+    if character.getX() == MAP_ROWS - 2:
+        map.level_up()
+
+    if character.getX() == MAP_END or keys[pygame.K_ESCAPE]:
+        kill_character(character)
+        map.update_tiles()
+        draw_map(map.get_tiles(), screen, (Camera.x, Camera.y))
+        map.add_furniture("Chandelier")
+        character_src = pygame.image.load("Characters/Character\\cube.png")
+        character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
+        character = BasicCharacter(character_src, character.getX(), character.getY())
+        changeable = True
+
+        if map.get_difficulty() == 1:
+            text = beginner()
+        elif map.get_difficulty() == 2:
+            text = advanced()
+        elif map.get_difficulty() == 3:
+            text = extreme_level()
+
+        counter = 0
+        add_text(screen, text, TEXT_COLOR, X_TEXT_POS, Y_TEXT_POS)
+
+    if not changeable:
+        changeable = character.onGround(map.get_tiles())
+
+    if map.get_difficulty() == 4:
         finished = True
 
     Camera.update()
     screen.fill((0, 0, 0))  # Clear the screen, add another layout
-    Camera.draw(screen, tiles, character, text, counter)
+    Camera.draw(screen, map.get_tiles(), character, text, counter)
     pygame.display.update()  # update the screen
     counter += 1
 
