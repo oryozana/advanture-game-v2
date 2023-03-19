@@ -1,3 +1,4 @@
+from Tiles.BasicTile import BasicTile
 from Tiles.CollideTile import CollideTile
 from Constants import *
 from random import randint
@@ -12,67 +13,67 @@ def create_chandeliers(amount, space, tiles, body_color, light_color, row, col):
 
 
 def create_chandelier(tiles, body_color, light_color, row, col):
-    tiles[row][col].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row][col + 1].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row][col + 2].setImgSrc(BASIC_COLORS[body_color])
+    tiles[row][col] = BasicTile(BASIC_COLORS[body_color], row, col)
+    tiles[row][col + 1] = BasicTile(BASIC_COLORS[body_color], row, col + 1)
+    tiles[row][col + 2] = BasicTile(BASIC_COLORS[body_color], row, col + 2)
 
-    tiles[row][col + 3].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row + 1][col + 3].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row - 1][col + 3].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row + 2][col + 3].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row - 2][col + 3].setImgSrc(BASIC_COLORS[body_color])
+    tiles[row][col + 3] = BasicTile(BASIC_COLORS[body_color], row, col + 3)
+    tiles[row + 1][col + 3] = BasicTile(BASIC_COLORS[body_color], row + 1, col + 3)
+    tiles[row - 1][col + 3] = BasicTile(BASIC_COLORS[body_color], row - 1, col + 3)
+    tiles[row + 2][col + 3] = BasicTile(BASIC_COLORS[body_color], row + 2, col + 3)
+    tiles[row - 2][col + 3] = BasicTile(BASIC_COLORS[body_color], row - 2, col + 3)
 
-    tiles[row][col + 4].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row + 2][col + 4].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row - 2][col + 4].setImgSrc(BASIC_COLORS[body_color])
+    tiles[row][col + 4] = BasicTile(BASIC_COLORS[body_color], row, col + 4)
+    tiles[row + 2][col + 4] = BasicTile(BASIC_COLORS[body_color], row + 2, col + 4)
+    tiles[row - 2][col + 4] = BasicTile(BASIC_COLORS[body_color], row - 2, col + 4)
 
-    tiles[row][col + 5].setImgSrc(BASIC_COLORS[light_color])
-    tiles[row + 2][col + 5].setImgSrc(BASIC_COLORS[light_color])
-    tiles[row - 2][col + 5].setImgSrc(BASIC_COLORS[light_color])
+    tiles[row][col + 5] = BasicTile(BASIC_COLORS[light_color], row, col + 5)
+    tiles[row + 2][col + 5] = BasicTile(BASIC_COLORS[light_color], row + 2, col + 5)
+    tiles[row - 2][col + 5] = BasicTile(BASIC_COLORS[light_color], row - 2, col + 5)
 
 
 def create_low_chandelier(tiles, body_color, light_color, row, col):
-    tiles[row][col].setImgSrc(BASIC_COLORS[body_color])
+    tiles[row][col] = BasicTile(BASIC_COLORS[body_color], row, col)
 
-    tiles[row][col + 1].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row + 1][col + 1].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row - 1][col + 1].setImgSrc(BASIC_COLORS[body_color])
+    tiles[row][col + 1] = BasicTile(BASIC_COLORS[body_color], row, col + 1)
+    tiles[row + 1][col + 1] = BasicTile(BASIC_COLORS[body_color], row + 1, col + 1)
+    tiles[row - 1][col + 1] = BasicTile(BASIC_COLORS[body_color], row - 1, col + 1)
 
-    tiles[row][col + 2].setImgSrc(BASIC_COLORS[body_color])
-    tiles[row + 1][col + 2].setImgSrc(BASIC_COLORS[light_color])
-    tiles[row - 1][col + 2].setImgSrc(BASIC_COLORS[light_color])
+    tiles[row][col + 2] = BasicTile(BASIC_COLORS[body_color], row, col + 2)
+    tiles[row + 1][col + 2] = BasicTile(BASIC_COLORS[light_color], row + 1, col + 2)
+    tiles[row - 1][col + 2] = BasicTile(BASIC_COLORS[light_color], row - 1, col + 2)
 
-    tiles[row][col + 3].setImgSrc(BASIC_COLORS[light_color])
+    tiles[row][col + 3] = BasicTile(BASIC_COLORS[light_color], row, col + 3)
 
 
-def create_mushrooms(amount, space, tiles, cap_color, secondary_cap_color, row, col):
+def create_mushrooms(amount, space, tiles, cap_color, circle_cap_color, row, col):
     for mushroom in range(amount):
         location = row + mushroom * space
         if 3 < location < MAP_ROWS - 3:
-            create_mushroom(tiles, cap_color, secondary_cap_color, location, col)
+            create_mushroom(tiles, cap_color, circle_cap_color, location, col)
 
 
-def create_mushroom(tiles, cap_color, secondary_cap_color, row, col):
-    tiles[row][col].setImgSrc(pygame.transform.rotate(BASIC_COLORS["HM"], 180))
-    tiles[row + 1][col].setImgSrc(pygame.transform.flip(BASIC_COLORS["HM"], False, True))
+def create_mushroom(tiles, cap_color, circle_cap_color, row, col):
+    tiles[row][col] = BasicTile(pygame.transform.rotate(BASIC_COLORS["HM"], 180), row, col)
+    tiles[row + 1][col] = BasicTile(pygame.transform.flip(BASIC_COLORS["HM"], False, True), row + 1, col)
 
-    tiles[row][col - 1].setImgSrc(BASIC_COLORS["EM"])
-    tiles[row + 1][col - 1].setImgSrc(pygame.transform.rotate(BASIC_COLORS["EM"], 180))
+    tiles[row][col - 1] = BasicTile(BASIC_COLORS["EM"], row, col - 1)
+    tiles[row + 1][col - 1] = BasicTile(pygame.transform.rotate(BASIC_COLORS["EM"], 180), row + 1, col - 1)
 
-    tiles[row][col - 2].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row + 1][col - 2].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row - 1][col - 2].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row + 2][col - 2].setImgSrc(BASIC_COLORS[cap_color])
+    tiles[row][col - 2] = BasicTile(BASIC_COLORS[cap_color], row, col - 2)
+    tiles[row + 1][col - 2] = BasicTile(BASIC_COLORS[cap_color], row + 1, col - 2)
+    tiles[row - 1][col - 2] = BasicTile(BASIC_COLORS[cap_color], row - 1, col - 2)
+    tiles[row + 2][col - 2] = BasicTile(BASIC_COLORS[cap_color], row + 2, col - 2)
 
-    tiles[row][col - 3].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row + 1][col - 3].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row - 1][col - 3].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row + 2][col - 3].setImgSrc(BASIC_COLORS[cap_color])
+    tiles[row][col - 3] = BasicTile(BASIC_COLORS[cap_color], row, col - 3)
+    tiles[row + 1][col - 3] = BasicTile(BASIC_COLORS[cap_color], row + 1, col - 3)
+    tiles[row - 1][col - 3] = BasicTile(BASIC_COLORS[cap_color], row - 1, col - 3)
+    tiles[row + 2][col - 3] = BasicTile(BASIC_COLORS[cap_color], row + 2, col - 3)
 
-    tiles[row][col - 4].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row + 1][col - 4].setImgSrc(BASIC_COLORS[cap_color])
-    tiles[row - 1][col - 4].setImgSrc(pygame.transform.rotate(BASIC_COLORS[secondary_cap_color], 270))
-    tiles[row + 2][col - 4].setImgSrc(pygame.transform.rotate(BASIC_COLORS[secondary_cap_color], 180))
+    tiles[row][col - 4] = BasicTile(BASIC_COLORS[cap_color], row, col - 4)
+    tiles[row + 1][col - 4] = BasicTile(BASIC_COLORS[cap_color], row + 1, col - 4)
+    tiles[row - 1][col - 4] = BasicTile(pygame.transform.rotate(BASIC_COLORS[circle_cap_color], 270), row - 1, col - 4)
+    tiles[row + 2][col - 4] = BasicTile(pygame.transform.rotate(BASIC_COLORS[circle_cap_color], 180), row + 2, col - 4)
 
 
 def create_desk(tiles, height, width, body_color, row, col):

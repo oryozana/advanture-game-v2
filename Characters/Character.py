@@ -11,10 +11,13 @@ class Character:
         self.actualX = x
         self.camera_pos = 0
 
-    def movement(self):
+    def movement(self, map, camera_end, jumping, jump_counter, falling):
         pass
 
-    def onGround(self):
+    def jump(self, map, jumping, jump_counter):
+        pass
+
+    def onGround(self, tiles):
         pass
 
     def type(self):
@@ -24,6 +27,9 @@ class Character:
         self.x = X_POSITION
         self.actualX = X_POSITION
         self.y = Y_POSITION
+
+    # def isGonnaStuck(self, tiles):
+    #     pass
 
     def getImageSrc(self):
         return self.img_src

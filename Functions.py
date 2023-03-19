@@ -22,15 +22,25 @@ def generate_menu(screen, rows, cols):  # auto create normal menu
 def update_menu_colors(screen, rows, cols):  # auto create normal menu
     for row in range(rows):
         for col in range(cols):
-            if random.randint(0, 100) < CHANGE_CHANCE:
+            change = True
+            if FIRST_RECT_Y_POS <= row * SCALE <= FIRST_RECT_Y_POS + RECT_SIZE:
+                if FIRST_RECT_X_POS <= col * SCALE <= FIRST_RECT_X_POS + RECT_SIZE:
+                    change = False
+                elif FIRST_RECT_X_POS + RECT_SPACE <= col * SCALE <= FIRST_RECT_X_POS + RECT_SIZE + RECT_SPACE:
+                    change = False
+                elif FIRST_RECT_X_POS + (RECT_SPACE * 2) <= col * SCALE <= FIRST_RECT_X_POS + RECT_SIZE + RECT_SPACE * 2:
+                    change = False
+                elif FIRST_RECT_X_POS + (RECT_SPACE * 3) <= col * SCALE <= FIRST_RECT_X_POS + RECT_SIZE + RECT_SPACE * 3:
+                    change = False
+
+            if random.randint(0, 100) < CHANGE_CHANCE and change:
                 color = random_color_generator()
                 pygame.draw.rect(screen, color, pygame.Rect(MENU_TILE_SIZE * col, MENU_TILE_SIZE * row, MENU_TILE_SIZE, MENU_TILE_SIZE))
-                pygame.display.flip()
                 initiate_menu(screen)
 
 
 def initiate_menu(screen):
-    levels = ["Beginner", "Advanced", "Extreme"]
+    levels = ["Beginner", "Advanced", "Extreme", "AI"]
     rects = []
     for rect in range(RECT_AMOUNT):
         pygame.draw.rect(screen, RECT_COLOR, pygame.Rect(FIRST_RECT_X_POS + RECT_SPACE * rect, FIRST_RECT_Y_POS, RECT_SIZE, RECT_SIZE))
@@ -81,23 +91,6 @@ def isWalkable(tiles, row, col):  # is possible to move through the tile
 
 def isKilled(tiles, row, col):  # is touch this tile will kill you
     return tiles[row][col].isKillable()
-
-
-def isGonnaBeKilled(character, jumping, falling, tiles):
-    killed = isKilled(tiles, character.getX() + 1, character.getY()) and not jumping
-    gonna_be_killed = False
-
-    if character.type() == "B":
-        if isKilled(tiles, character.getX() + 1, character.getY() + 1) and falling:
-            gonna_be_killed = True
-            killed = True
-
-    elif character.type() == "R":
-        if isKilled(tiles, character.getX() + 1, character.getY() - 1) and falling:
-            gonna_be_killed = True
-            killed = True
-
-    return killed, gonna_be_killed
 
 
 def kill_character(character):

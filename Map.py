@@ -1,5 +1,5 @@
-import Constants
 import Furniture
+from Constants import *
 from Tiles.BasicTile import *
 from Tiles.CollideTile import *
 from Tiles.ObstacleTile import *
@@ -7,6 +7,7 @@ from Tiles.ObstacleTile import *
 
 class Map:
     def __init__(self):
+        write_map("map.txt", MAP_ROWS, MAP_COLS, 1)
         self.map = read_map()
         self.tiles = generate_tiles(self.map)
         self.difficulty = 1
@@ -14,11 +15,11 @@ class Map:
         self.advanced_skulls = []
         self.extreme_skulls = []
 
-        write_map("map.txt", MAP_ROWS, MAP_COLS, 1)
+        write_map("map.txt", MAP_ROWS, MAP_COLS, BEGINNER_DIFFICULTY)
         self.beginner_map = read_map()
-        write_map("map.txt", MAP_ROWS, MAP_COLS, 2)
+        write_map("map.txt", MAP_ROWS, MAP_COLS, ADVANCED_DIFFICULTY)
         self.advanced_map = read_map()
-        write_map("map.txt", MAP_ROWS, MAP_COLS, 3)
+        write_map("map.txt", MAP_ROWS, MAP_COLS, EXTREME_DIFFICULTY)
         self.extreme_map = read_map()
 
     def add_furniture(self, furniture_name):
@@ -31,11 +32,11 @@ class Map:
     def add_skulls_to_tiles(self):
         skulls_list = []
         match self.difficulty:
-            case 1:
+            case Constants.BEGINNER_DIFFICULTY:
                 skulls_list = self.beginner_skulls
-            case 2:
+            case Constants.ADVANCED_DIFFICULTY:
                 skulls_list = self.advanced_skulls
-            case 3:
+            case Constants.EXTREME_DIFFICULTY:
                 skulls_list = self.extreme_skulls
 
         for location in skulls_list:
@@ -45,11 +46,11 @@ class Map:
         if location[1] != MAP_END:
             skulls_list = []
             match self.difficulty:
-                case 1:
+                case Constants.BEGINNER_DIFFICULTY:
                     skulls_list = self.beginner_skulls
-                case 2:
+                case Constants.ADVANCED_DIFFICULTY:
                     skulls_list = self.advanced_skulls
-                case 3:
+                case Constants.EXTREME_DIFFICULTY:
                     skulls_list = self.extreme_skulls
 
             match character_type:
@@ -60,19 +61,18 @@ class Map:
 
     def update_map(self):
         match self.difficulty:
-            case 1:
+            case Constants.BEGINNER_DIFFICULTY:
                 self.map = self.beginner_map
-            case 2:
+            case Constants.ADVANCED_DIFFICULTY:
                 self.map = self.advanced_map
-            case 3:
+            case Constants.EXTREME_DIFFICULTY:
                 self.map = self.extreme_map
         self.update_tiles()
 
-    def update_tiles(self, tiles):
-        self.tiles = tiles
-
     def update_tiles(self):
         self.tiles = generate_tiles(self.map)
+        self.add_furniture("Chandelier")
+        self.add_furniture("Mushroom")
 
     def update_difficulty(self, difficulty):
         self.difficulty = difficulty
@@ -97,7 +97,7 @@ def write_map(map_name, rows, cols, difficulty):  # create a basic editable text
     for row in range(rows):
         for col in range(cols):
             if row == 0 or row == rows - 1 or col == 0 or col == cols - 1:
-                f.write("X ")
+                f.write("R ")
             elif col == FLOOR_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
                 f.write("S ")
             elif col == CELLING_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
