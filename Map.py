@@ -1,3 +1,4 @@
+import Constants
 import Furniture
 from Constants import *
 from Tiles.BasicTile import *
@@ -8,19 +9,22 @@ from Tiles.ObstacleTile import *
 class Map:
     def __init__(self):
         write_map("map.txt", MAP_ROWS, MAP_COLS, 1)
-        self.map = read_map()
+        self.map = read_map("map.txt")
         self.tiles = generate_tiles(self.map)
         self.difficulty = 1
         self.beginner_skulls = []
         self.advanced_skulls = []
         self.extreme_skulls = []
+        self.ai_skulls = []
 
         write_map("map.txt", MAP_ROWS, MAP_COLS, BEGINNER_DIFFICULTY)
-        self.beginner_map = read_map()
+        self.beginner_map = read_map("map.txt")
         write_map("map.txt", MAP_ROWS, MAP_COLS, ADVANCED_DIFFICULTY)
-        self.advanced_map = read_map()
+        self.advanced_map = read_map("map.txt")
         write_map("map.txt", MAP_ROWS, MAP_COLS, EXTREME_DIFFICULTY)
-        self.extreme_map = read_map()
+        self.extreme_map = read_map("map.txt")
+
+        self.ai_map = read_map("ai_map.txt")
 
     def add_furniture(self, furniture_name):
         match furniture_name:
@@ -38,6 +42,8 @@ class Map:
                 skulls_list = self.advanced_skulls
             case Constants.EXTREME_DIFFICULTY:
                 skulls_list = self.extreme_skulls
+            case Constants.AI_DIFFICULTY:
+                skulls_list = self.ai_skulls
 
         for location in skulls_list:
             self.tiles[location[0]][location[1]].setImgSrc(BASIC_COLORS["SK"])
@@ -52,6 +58,8 @@ class Map:
                     skulls_list = self.advanced_skulls
                 case Constants.EXTREME_DIFFICULTY:
                     skulls_list = self.extreme_skulls
+                case Constants.AI_DIFFICULTY:
+                    skulls_list = self.ai_skulls
 
             match character_type:
                 case "B":
@@ -67,6 +75,8 @@ class Map:
                 self.map = self.advanced_map
             case Constants.EXTREME_DIFFICULTY:
                 self.map = self.extreme_map
+            case Constants.AI_DIFFICULTY:
+                self.map = self.ai_map
         self.update_tiles()
 
     def update_tiles(self):
@@ -97,7 +107,7 @@ def write_map(map_name, rows, cols, difficulty):  # create a basic editable text
     for row in range(rows):
         for col in range(cols):
             if row == 0 or row == rows - 1 or col == 0 or col == cols - 1:
-                f.write("R ")
+                f.write("X ")
             elif col == FLOOR_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
                 f.write("S ")
             elif col == CELLING_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
@@ -110,9 +120,9 @@ def write_map(map_name, rows, cols, difficulty):  # create a basic editable text
     f.close()  # write_map("map.txt", MAP_ROWS, MAP_COLS, map.get_difficulty())
 
 
-def read_map():  # read the .txt map and return it
+def read_map(map_name):  # read the .txt map and return it
     world = []
-    f = open("map.txt", "r")
+    f = open(map_name, "r")
     for line in f:
         line = line.replace("\n", "")
         world.append(line.split(" ")[:-1])
@@ -156,7 +166,7 @@ def generate_map_from_tiles(tiles):
     for row in range(MAP_ROWS):
         new_line = []
         for col in range(MAP_COLS):
-            new_line.append(tiles[row][col].getType())
+            new_line.append(tiles[row][col].getColor())
         map.append(new_line)
     return map
 

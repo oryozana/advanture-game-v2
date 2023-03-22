@@ -4,12 +4,11 @@ from Functions import *
 
 
 class Tile:  # tile used as a super class, the whole display made from them
-    def __init__(self, img_src, x, y, color):
+    def __init__(self, img_src, x, y):
         self.img_src = img_src
         self.img_src = pygame.transform.scale(self.img_src, (SCALE, SCALE))
         self.x = x
         self.y = y
-        self.color = color
 
     def isWalkable(self):
         pass
@@ -28,7 +27,17 @@ class Tile:  # tile used as a super class, the whole display made from them
         self.img_src = pygame.transform.scale(self.img_src, (SCALE, SCALE))
 
     def getColor(self):
-        return self.color
+        for key, value in EVERY_COLOR.items():
+            value = pygame.transform.scale(value, (SCALE, SCALE))
+
+            value_array = pygame.surfarray.array2d(value)
+            img_array = pygame.surfarray.array2d(self.img_src)
+            if (value_array == img_array).all():
+                return key
+
+        return "W"
+
+
 
     def getX(self):
         return self.x

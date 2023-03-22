@@ -44,11 +44,11 @@ def extreme_difficulty():
     mixer.music.play()
     return "It's an Impossible level. are you insane?!"
 
-def ai_difficulty():
-    create_shelves(DEFAULT_SHELF_DISTANCE, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
 
-    save_map("ai_map.txt", generate_map_from_tiles(map.get_tiles()))
-    map.add_skulls_to_tiles()
+def ai_difficulty():
+
+    # print("nvejivnovnreoi")
+    # map.add_skulls_to_tiles()
 
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
     mixer.music.set_volume(0.7)
@@ -122,7 +122,7 @@ def create_menu():
                     text = beginner_difficulty()
                     clicked = True
 
-                if clicked:
+                if clicked and not mouse_in_button(rects[3], mouse_pos):
                     map.add_furniture("Chandelier")
                     map.add_furniture("Mushroom")
 
