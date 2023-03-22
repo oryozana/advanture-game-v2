@@ -149,3 +149,22 @@ def generate_tiles(map):  # create the tiles based of the map
                     new_line.append(ObstacleTile(Constants.OBSTACLE_COLORS[color], row, col))
         tiles.append(new_line)
     return tiles
+
+
+def generate_map_from_tiles(tiles):
+    map = []
+    for row in range(MAP_ROWS):
+        new_line = []
+        for col in range(MAP_COLS):
+            new_line.append(tiles[row][col].getType())
+        map.append(new_line)
+    return map
+
+
+def save_map(map_name, map):
+    f = open(map_name, "w")
+    for row in range(MAP_ROWS):
+        for col in range(MAP_COLS):
+            f.write(map[row][col] + " ")
+        f.write("\n")
+    f.close()  # save_map("map.txt", generate_map_from_tiles())

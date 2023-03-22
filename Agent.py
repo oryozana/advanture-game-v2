@@ -52,9 +52,9 @@ class Agent(Player):
 
     def initiate_states(self):
         states = [X_POSITION, Y_POSITION, tf_values[False], 0, tf_values[False], tf_values[True], gravity_directions["B"]]
-        for row in range(MAP_ROWS):
+        for row in range(10):
             for col in range(MAP_COLS):
-                states.append(tiles_values[self.map.get_tiles()[row][col].getType()])
+                states.append(tiles_values[self.map.get_tiles()[self.character.getX() + row][col].getType()])
 
         return states
 
@@ -151,11 +151,11 @@ class Agent(Player):
             est_reward = reward
             if not done:
                 # learning role:
-                next_state = self._reshape_state(next_state)
+                next_state = numpy.reshape(next_state, (1, -1))
                 prediction = self.model.predict(next_state)
                 predicted_reward = numpy.amax(prediction[0])
                 est_reward = reward + self.gamma * predicted_reward
-            state = self._reshape_state(state)
+            state = numpy.reshape(state, (1, -1))
             curr_value = self.model.predict(state)
             curr_value[0][action] = est_reward
             # Update the model
@@ -169,10 +169,6 @@ class Agent(Player):
         if self.epsilon > epsilon_min:
             self.epsilon = self.epsilon * epsilon_decay
 
-    @staticmethod
-    def _reshape_state(state):
-        return state.values()
-
     def train(self, n_train_episodes, model_name):
         for i in range(n_train_episodes):
             state = self.initiate_states()
@@ -180,14 +176,13 @@ class Agent(Player):
 
             while not done:
                 action = self._act(state)
-                next_state, reward, done, _, _ = env.step(action)
-                next_state = self._reshape_state(next_state)
+                reward, done = self.step(action)
 
                 if done:
-                    reward = -1
+                    reward = -10
 
-                self._update_memory(state, action, reward, next_state, done)
-                state = next_state
+                self._update_memory(state, action, reward, self.states, done)
+                state = self.states
 
             self._learn(self.batch_size)
 
@@ -207,35 +202,23 @@ class Agent(Player):
     def step(self, action):
         # Perform the action in the game
         if action == "jump":
-            _, _ = self.character.jump(self.map, self.jumping, self.jump_counter)
+            self.jumping, self.jump_counter = self.character.jump(self.map, self.jumping, self.jump_counter)
 
         elif action == "reverse_gravity":
             self.reverse_gravity()
 
         if action != "none":
-            tmp_character = None
-
-            if self.character.type() == "R":
-                character_src = pygame.image.load("Characters/Character\\cubeReversed.png")
-                character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
-                tmp_character = ReversedCharacter(character_src, self.character.getX(), self.character.getY())
-
-            elif self.character.type() == "B":
-                character_src = pygame.image.load("Characters/Character\\cube.png")
-                character_src = pygame.transform.scale(character_src, (CHARACTER_WIDTH, CHARACTER_HEIGHT))
-                tmp_character = BasicCharacter(character_src, self.character.getX(), self.character.getY())
-
-            self.camera_end, self.jumping, self.jump_counter, self.falling = tmp_character.movement(self.map, self.camera_end, self.jumping, self.jump_counter, self.falling)
-
+            self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map, self.camera_end, self.jumping, self.jump_counter, self.falling)
 
         # Get the updated game state
         self.update_states()
 
         # Calculate the reward
-        reward = rewards[self.map.get_tiles()[self.character.getX()][self.character.getY()]]
+        reward = rewards[self.map.get_tiles()[self.character.getX()][self.character.getY()].getType()]
 
         # Check if the game is over
         done = self.killed or self.gonna_be_killed or self.character.getX() == MAP_END
 
         # Return the new state, reward, and done flag
+        self.update_states()
         return reward, done

@@ -44,16 +44,29 @@ def extreme_difficulty():
     mixer.music.play()
     return "It's an Impossible level. are you insane?!"
 
+def ai_difficulty():
+    create_shelves(DEFAULT_SHELF_DISTANCE, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
+
+    save_map("ai_map.txt", generate_map_from_tiles(map.get_tiles()))
+    map.add_skulls_to_tiles()
+
+    mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
+    mixer.music.set_volume(0.7)
+    mixer.music.play()
+    return "It's my turn, let me show you how things get done :)"
+
 
 def difficulty_handler():
     text = ""
 
-    if map.get_difficulty() == BEGINNER_DIFFICULTY or map.get_difficulty() == AI_DIFFICULTY:
+    if map.get_difficulty() == BEGINNER_DIFFICULTY:
         text = beginner_difficulty()
     elif map.get_difficulty() == ADVANCED_DIFFICULTY:
         text = advanced_difficulty()
     elif map.get_difficulty() == EXTREME_DIFFICULTY:
         text = extreme_difficulty()
+    elif map.get_difficulty() == AI_DIFFICULTY:
+        text = ai_difficulty()
 
     add_text(screen, text, TEXT_COLOR, X_TEXT_POS, Y_TEXT_POS)
     return 0, text  # counter = 0
@@ -181,7 +194,7 @@ def initiate_game(active_game: bool):
         if not player.changeable:
             player.changeable = player.character.onGround(map.get_tiles())
 
-        if map.get_difficulty() == 4:
+        if map.get_difficulty() == END_GAME_DIFFICULTY:
             return True
 
         Camera.update()
@@ -192,7 +205,7 @@ def initiate_game(active_game: bool):
 
 
 rects, text, run = create_menu()
-3
+
 finished = initiate_game(run)
 
 if finished:
@@ -204,8 +217,8 @@ while finished:
     for event in pygame.event.get():  # close pygame
         if event.type == pygame.QUIT:
             finished = False
-#
+
 # agent = Agent.Agent(map, screen)
-# agent.train(100, "first.h5")
+# agent.train(1, "first.h5")
 
 pygame.quit()
