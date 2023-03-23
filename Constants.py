@@ -53,7 +53,7 @@ FPS = 13  # normal: 12
 JUMP = 5  # normal: 6
 GRAVITY = 1
 X_POSITION = 1
-Y_POSITION = MAP_COLS - 20
+Y_POSITION = (CELLING_HEIGHT + FLOOR_HEIGHT) // 2 - 8
 CHARACTER_HEIGHT = 20
 CHARACTER_WIDTH = 20
 
@@ -77,6 +77,7 @@ MIN_FURNITURE_AMOUNT = 3
 SHELF_HEIGHT_DIFF = int(JUMP // 2) + 1
 DEFAULT_SHELF_HEIGHT = 15
 SUPPORT_SHELF_LENGTH = 11
+SUPPORT_SHELF_HEIGHT = (CELLING_HEIGHT + FLOOR_HEIGHT) // 2
 DEFAULT_SHELF_LENGTH = 4
 DEFAULT_SHELF_DISTANCE = 10
 
@@ -97,9 +98,9 @@ DEFAULT_TRAP_SPAWN_RATE = 4
 
 # Tiles:
 EVERY_COLOR = {"R": pygame.image.load("Colors\\rust.png"),
+               "G": pygame.image.load("Colors\\gold.png"),
                "W": pygame.image.load("Colors\\white.png"),
                "X": pygame.image.load("Colors\\brick_wall.png"),
-               "G": pygame.image.load("Colors\\gold.png"),
                "SI": pygame.image.load("Colors\\silver.png"),
                "SK": pygame.image.load("Colors\\skull.png"),
                "HM": pygame.image.load("Colors\\mushroom_hand.png"),
@@ -108,6 +109,19 @@ EVERY_COLOR = {"R": pygame.image.load("Colors\\rust.png"),
                "EM": pygame.image.load("Colors\\mushroom_eye.png"),
                "S": pygame.image.load("Colors\\spears.png"),
                "RS": pygame.image.load("Colors\\reversed_spears.png")}
+
+# EVERY_COLOR = {"R": pygame.image.load("Colors\\rust.png"),
+#                "W": pygame.image.load("Colors\\white.png"),
+#                "X": pygame.image.load("Colors\\brick_wall.png"),
+#                "G": pygame.image.load("Colors\\gold.png"),
+#                "SI": pygame.image.load("Colors\\silver.png"),
+#                "SK": pygame.image.load("Colors\\skull.png"),
+#                "HM": pygame.image.load("Colors\\mushroom_hand.png"),
+#                "CM": pygame.image.load("Colors\\mushroom_cap_color.png"),
+#                "SM": pygame.image.load("Colors\\mushroom_secondary_color.png"),
+#                "EM": pygame.image.load("Colors\\mushroom_eye.png"),
+#                "S": pygame.image.load("Colors\\spears.png"),
+#                "RS": pygame.image.load("Colors\\reversed_spears.png")}
 
 ALL_COLORS = {"R": pygame.image.load("Colors\\rust.png"),
               "W": pygame.image.load("Colors\\white.png"),

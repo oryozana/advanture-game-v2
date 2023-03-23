@@ -81,8 +81,9 @@ class Map:
 
     def update_tiles(self):
         self.tiles = generate_tiles(self.map)
-        self.add_furniture("Chandelier")
-        self.add_furniture("Mushroom")
+        if self.difficulty != Constants.AI_DIFFICULTY:
+            self.add_furniture("Chandelier")
+            self.add_furniture("Mushroom")
 
     def update_difficulty(self, difficulty):
         self.difficulty = difficulty
@@ -112,7 +113,7 @@ def write_map(map_name, rows, cols, difficulty):  # create a basic editable text
                 f.write("S ")
             elif col == CELLING_HEIGHT and random.randint(0, DEFAULT_TRAP_SPAWN_RATE - difficulty) == 0:
                 f.write("RS ")
-            elif col == (CELLING_HEIGHT + FLOOR_HEIGHT) // 2 and 0 < row < SUPPORT_SHELF_LENGTH:
+            elif col == SUPPORT_SHELF_HEIGHT and 0 < row < SUPPORT_SHELF_LENGTH:
                 f.write("R ")
             else:
                 f.write("W ")
@@ -177,4 +178,4 @@ def save_map(map_name, map):
         for col in range(MAP_COLS):
             f.write(map[row][col] + " ")
         f.write("\n")
-    f.close()  # save_map("map.txt", generate_map_from_tiles())
+    f.close()  # save_map("ai_map.txt", generate_map_from_tiles(map.get_tiles()))

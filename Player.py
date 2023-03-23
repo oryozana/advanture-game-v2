@@ -1,3 +1,4 @@
+import Constants
 from Functions import isKilled
 from Characters.BasicCharacter import *
 from Characters.ReversedCharacter import *
@@ -50,7 +51,8 @@ class Player:
         self.just_changed_from = self.character.type()
 
     def isGonnaBeKilled(self):
-        self.killed = isKilled(self.map.get_tiles(), self.character.getX() + 1, self.character.getY()) and not self.jumping
+        self.killed = isKilled(self.map.get_tiles(), self.character.getX() + 1,
+                               self.character.getY()) and not self.jumping
         self.gonna_be_killed = False
 
         if self.character.type() == "B":
@@ -67,7 +69,7 @@ class Player:
 
     def death_handler(self):
         if self.killed or self.gonna_be_killed:
-            self.score -= 25
+            killed_location = None
 
             if self.just_changed:
                 character_src = pygame.image.load("Characters/Character\\cube.png")  # / - Folder, \\ - File
@@ -96,11 +98,21 @@ class Player:
             self.character = BasicCharacter(character_src, self.character.getX(), self.character.getY())
             self.changeable = True
 
-            self.map.add_skull(self.character.type(), killed_location)
+            if killed_location is not None:
+                self.map.add_skull(self.character.type(), killed_location)
 
     def stay_alive_handler(self):
         if not self.killed:
-            self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map, self.camera_end, self.jumping, self.jump_counter, self.falling)
+            self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map,
+                                                                                                     self.camera_end,
+                                                                                                     self.jumping,
+                                                                                                     self.jump_counter,
+                                                                                                     self.falling)
+
+            if self.character.onGround(self.map.get_tiles()) and DEFAULT_SHELF_HEIGHT - SHELF_HEIGHT_DIFF - 1 <= self.character.getY() <= DEFAULT_SHELF_HEIGHT + SHELF_HEIGHT_DIFF + 1:
+                self.score += 25
+            if self.character.getY() == CELLING_HEIGHT or self.character.getY() == FLOOR_HEIGHT:
+                self.score -= 5
             self.score += 1
         else:
             self.gonna_be_killed = False

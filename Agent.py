@@ -11,6 +11,7 @@ from keras.models import Sequential
 import keras
 from keras.layers import Dense
 from collections import deque
+from Camera import Camera
 
 rewards = {
     "O": -1,
@@ -19,14 +20,14 @@ rewards = {
 }
 
 tiles_values = {
-    "O": -50,
-    "B": JUMP + 1,
-    "C": 50
+    "O": -1,
+    "B": 0,
+    "C": 1
 }
 
 gravity_directions = {
-    "B": 10,
-    "R": -10
+    "B": 5,
+    "R": -5
 }
 
 tf_values = {
@@ -39,16 +40,16 @@ class Agent(Player):
     def __init__(self, map: Map, screen):
         super().__init__(map, screen)
 
-        self.actions = ["jump", "reverse_gravity", "none"]
+        self.actions = [0, 1, 2]
         self.states = self.initiate_states()
 
-        self.learning_rate = 0.001
-        self.batch_size = 32
-        self.gamma = 0.99
-        self.epsilon = 0.3
+        self.learning_rate = 0.1
+        self.batch_size = 64
+        self.gamma = 0.95
+        self.epsilon = 1
 
         self.model = self.build_model()
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=20000)
 
     def initiate_states(self):
         states = [X_POSITION, Y_POSITION, tf_values[False], 0, tf_values[False], tf_values[True], gravity_directions["B"]]
@@ -59,12 +60,12 @@ class Agent(Player):
         return states
 
     def get_available_actions(self):
-        available_actions = ["none"]
+        available_actions = [0]  # "none"
 
         if self.changeable:
-            available_actions.append("reverse_gravity")
+            available_actions.append(1)  # "reverse_gravity"
         if self.character.onGround():
-            available_actions.append("jump")
+            available_actions.append(2)  # "jump"
 
         return available_actions
 
@@ -84,9 +85,20 @@ class Agent(Player):
         model = Sequential()
         model.add(Dense(len(self.states), activation='relu', input_shape=(len(self.states), )))
 
-        model.add(Dense(16, activation='relu'))
-        model.add(Dense(8, activation='relu'))
-        model.add(Dense(8, activation='relu'))
+        model.add(Dense(128, activation='selu', input_shape=(len(self.states),)))
+        # model.add(Dense(64, activation='tanh'))
+        # model.add(Dense(32, activation='sigmoid'))
+        # model.add(Dense(16, activation='elu'))
+        # model.add(Dense(8, activation='selu'))
+
+        model.add(Dense(64, activation='tanh'))
+        model.add(Dense(32, activation='sigmoid'))
+        model.add(Dense(16, activation='elu'))
+        model.add(Dense(8, activation='selu'))
+
+        # model.add(Dense(64, activation='relu'))
+        # model.add(Dense(16, activation='relu'))
+        # model.add(Dense(8, activation='relu'))
 
         model.add(Dense(len(self.actions), activation='softmax'))
         model.compile(loss='mse', optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate))
@@ -110,36 +122,6 @@ class Agent(Player):
         else:
             action = round(numpy.random.choice(actions[0]))
         return action
-
-    # def learn(self, batch_size=32, gamma=0.99):
-    #     # Sample a batch of experiences from the replay buffer
-    #     experiences = self.replay_buffer.sample(batch_size)
-    #
-    #     # Extract the state, action, reward, next_state, and done variables from the experiences
-    #     states = numpy.array([e[0] for e in experiences])
-    #     actions = numpy.array([e[1] for e in experiences])
-    #     rewards = numpy.array([e[2] for e in experiences])
-    #     next_states = numpy.array([e[3] for e in experiences])
-    #     dones = numpy.array([e[4] for e in experiences])
-    #
-    #     # Compute the Q-values for the current states and actions
-    #     q_values = self.q_network.predict(states)
-    #     q_values = q_values.reshape(-1, self.num_actions)
-    #     q_values = q_values[np.arange(len(q_values)), actions]
-    #
-    #     # Compute the target Q-values for the next states
-    #     next_q_values = self.target_q_network.predict(next_states)
-    #     next_q_values = next_q_values.reshape(-1, self.num_actions)
-    #     max_next_q_values = np.max(next_q_values, axis=1)
-    #     target_q_values = rewards + (gamma * max_next_q_values * (1 - dones))
-    #
-    #     # Update the Q-network weights using the target Q-values
-    #     q_values = np.clip(q_values, -10, 10)  # clip the Q-values to avoid exploding gradients
-    #     target_q_values = np.clip(target_q_values, -10, 10)  # clip the target Q-values
-    #     self.q_network.train_on_batch(states, target_q_values)
-    #
-    #     # Update the target Q-network weights
-    #     self.update_target_q_network()
 
     def _learn(self, batch_size):
         # If the memory is not big enough
@@ -169,42 +151,77 @@ class Agent(Player):
         if self.epsilon > epsilon_min:
             self.epsilon = self.epsilon * epsilon_decay
 
-    def train(self, n_train_episodes, model_name):
+    def train(self, n_train_episodes, model_name, text):
         for i in range(n_train_episodes):
             state = self.initiate_states()
+            text_counter = 0
             done = False
 
             while not done:
                 action = self._act(state)
                 reward, done = self.step(action)
 
+                Camera.update()
+                self.screen.fill((0, 0, 0))  # Clear the screen, add another layout
+                Camera.draw(self.screen, self.map.get_tiles(), self.character, text, text_counter)
+                pygame.display.update()  # update the screen
+                text_counter += 1
+
                 if done:
-                    reward = -10
+                    reward -= 50
 
                 self._update_memory(state, action, reward, self.states, done)
                 state = self.states
 
             self._learn(self.batch_size)
-
         self._save_model(model_name)
 
-    def test(self, env, n_test_episodes, model_name):
-        # TODO: create test function
-        pass
+    def test(self, n_test_trials, model_name, text):
+        self.model = self._load_model(model_name)
 
-    def get_action(self):
-        if numpy.random.rand() < self.epsilon:
-            return random.choice(self.actions)
-        state = numpy.array([self.states[key] for key in self.states.keys()])
-        q_values = self.model.predict(state.reshape(1, -1)).flatten()
-        return self.actions[numpy.argmax(q_values)]
+        rewards = []
+        for trial in range(n_test_trials):
+            state = numpy.reshape(self.initiate_states(), (1, -1))
+
+            self.death_handler()
+            text_counter = 0
+            done = False
+            score = 0
+
+            print("****************************************************")
+            print("TRIAL ", trial)
+
+            while not done:
+                actions = self.model.predict(state)
+                action = numpy.argmax(actions[0])
+
+                Camera.update()
+                self.screen.fill((0, 0, 0))  # Clear the screen, add another layout
+                Camera.draw(self.screen, self.map.get_tiles(), self.character, text, text_counter)
+                pygame.display.update()  # update the screen
+                text_counter += 1
+
+                reward, done = self.step(action)
+                score += 1
+                if done:
+                    print("-------------------------------------------------Trial {}#, Score: {}".format(trial, score))
+            rewards.append(score)
+        print("Score over time: " + str(sum(rewards) / n_test_trials))  # optional
+        return rewards
+
+    # def get_action(self):
+    #     if numpy.random.rand() < self.epsilon:
+    #         return random.choice(self.actions)
+    #     state = numpy.array([self.states[key] for key in self.states.keys()])
+    #     q_values = self.model.predict(state.reshape(1, -1)).flatten()
+    #     return self.actions[numpy.argmax(q_values)]
 
     def step(self, action):
         # Perform the action in the game
-        if action == "jump":
+        if action == "jump" or action == 0:
             self.jumping, self.jump_counter = self.character.jump(self.map, self.jumping, self.jump_counter)
 
-        elif action == "reverse_gravity":
+        elif action == "reverse_gravity" or action == 1:
             self.reverse_gravity()
 
         if action != "none":
@@ -214,10 +231,14 @@ class Agent(Player):
         self.update_states()
 
         # Calculate the reward
+        # print(self.map.get_tiles())
         reward = rewards[self.map.get_tiles()[self.character.getX()][self.character.getY()].getType()]
 
         # Check if the game is over
+        self.isGonnaBeKilled()
         done = self.killed or self.gonna_be_killed or self.character.getX() == MAP_END
+        if self.character.getX() == MAP_END:
+            self.score += 500
 
         # Return the new state, reward, and done flag
         self.update_states()

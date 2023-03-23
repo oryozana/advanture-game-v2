@@ -32,6 +32,7 @@ class Tile:  # tile used as a super class, the whole display made from them
 
             value_array = pygame.surfarray.array2d(value)
             img_array = pygame.surfarray.array2d(self.img_src)
+
             if (value_array == img_array).all():
                 return key
 

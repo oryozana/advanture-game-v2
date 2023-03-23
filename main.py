@@ -42,12 +42,17 @@ def extreme_difficulty():
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
-    return "It's an Impossible level. are you insane?!"
+    return "It's an Impossible level. Are you insane?!"
 
 
 def ai_difficulty():
+    # run to generate a new ai_map:
+    # write_map("ai_map.txt", MAP_ROWS, MAP_COLS, BEGINNER_DIFFICULTY)
+    # create_shelves(DEFAULT_SHELF_DISTANCE, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
+    # map.add_furniture("Chandelier")
+    # map.add_furniture("Mushroom")
+    # save_map("ai_map.txt", generate_map_from_tiles(map.get_tiles()))
 
-    # print("nvejivnovnreoi")
     # map.add_skulls_to_tiles()
 
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
@@ -80,9 +85,11 @@ pygame.display.set_caption("Adventure_game")
 pygame.display.flip()
 
 map = Map()
-map.add_furniture("Chandelier")
-map.add_furniture("Mushroom")
-create_shelves(10, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
+# map.add_furniture("Chandelier")
+# map.add_furniture("Mushroom")
+# create_shelves(10, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
+
+map.get_tiles()[5][5].getColor()
 
 
 def create_menu():
@@ -119,12 +126,14 @@ def create_menu():
                     clicked = True
                 elif mouse_in_button(rects[3], mouse_pos):
                     map.update_difficulty(AI_DIFFICULTY)
-                    text = beginner_difficulty()
+                    text = ai_difficulty()
                     clicked = True
 
-                if clicked and not mouse_in_button(rects[3], mouse_pos):
-                    map.add_furniture("Chandelier")
-                    map.add_furniture("Mushroom")
+                if clicked:
+                    add_text(screen, text, TEXT_COLOR, X_TEXT_POS, Y_TEXT_POS)
+                    if not mouse_in_button(rects[3], mouse_pos):
+                        map.add_furniture("Chandelier")
+                        map.add_furniture("Mushroom")
 
         if time % CHANGE_RATE == 0:
             update_menu_colors(screen, MENU_COLS, MENU_ROWS)
@@ -153,11 +162,10 @@ def create_options():
                 clicked = True
 
 
-def initiate_game(active_game: bool):
+def initiate_game(text: str, active_game: bool):
     player = Player(map, screen)
 
     text_counter = 0
-    text = ""
 
     while active_game:
         clock.tick(FPS)
@@ -167,7 +175,7 @@ def initiate_game(active_game: bool):
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
-            create_menu()
+            _, text, _ = create_menu()
 
         if keys[pygame.K_o]:
             create_options()
@@ -206,7 +214,7 @@ def initiate_game(active_game: bool):
 
 rects, text, run = create_menu()
 
-finished = initiate_game(run)
+finished = initiate_game(text, run)
 
 if finished:
     screen.fill(random_color_generator())  # Clear the screen, add another layout
@@ -218,7 +226,9 @@ while finished:
         if event.type == pygame.QUIT:
             finished = False
 
+# map.update_difficulty(AI_DIFFICULTY)
 # agent = Agent.Agent(map, screen)
-# agent.train(1, "first.h5")
+# agent.train(1000, "third.h5", "Training...")
+# agent.test(5, "third.h5", "Testing...")
 
 pygame.quit()
