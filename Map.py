@@ -137,8 +137,7 @@ def draw_map(tiles, screen, camera_origin):  # make the tiles list (based map) a
             tile = tiles[row][col]
             pygame.transform.scale(tile.getImgSrc(), (SCALE, SCALE))
             camera_x, camera_y = camera_origin
-            screen.blit(tile.getImgSrc(),
-                        (tile.getX() * Constants.SCALE - camera_x, tile.getY() * Constants.SCALE - camera_y))
+            screen.blit(tile.getImgSrc(), (tile.getX() * Constants.SCALE - camera_x, tile.getY() * Constants.SCALE - camera_y))
 
 
 # Tiles:

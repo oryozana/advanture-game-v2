@@ -2,6 +2,7 @@ import pygame.transform
 import Constants
 import Furniture
 from Tiles.BasicTile import *
+from Tiles.BasicTile import BasicTile
 from Tiles.CollideTile import *
 from Tiles.CollideTile import CollideTile
 from Tiles.ObstacleTile import *
@@ -40,7 +41,7 @@ def update_menu_colors(screen, rows, cols):  # auto create normal menu
 
 
 def initiate_menu(screen):
-    levels = ["Beginner", "Advanced", "Extreme", "AI"]
+    levels = ["Beginner", "Advanced", "Extreme", "Beta - AI"]
     rects = []
     for rect in range(RECT_AMOUNT):
         pygame.draw.rect(screen, RECT_COLOR, pygame.Rect(FIRST_RECT_X_POS + RECT_SPACE * rect, FIRST_RECT_Y_POS, RECT_SIZE, RECT_SIZE))
@@ -74,6 +75,42 @@ def add_text(screen, text, color, x_pos, y_pos):
 def mouse_in_button(rect, mouse_pos):
     if rect.getX() + RECT_SIZE > mouse_pos[0] > rect.getX() and rect.getY() < mouse_pos[1] < rect.getY() + RECT_SIZE:
         return True
+
+
+# End screen:
+def generate_end_screen():
+    end_screen = []
+    for row in range(END_SCREEN_ROWS):
+        new_line = []
+        for col in range(END_SCREEN_COLS):
+            if col == FLOOR_HEIGHT + 1 or col == CELLING_HEIGHT - 1 or row == 0 or row == END_SCREEN_ROWS - 1:
+                new_line.append("X")
+            else:
+                new_line.append("W")
+        end_screen.append(new_line)
+    return end_screen
+
+
+def generate_tiles_end_screen(map):  # create the tiles based of the map
+    tiles = []
+    for row in range(END_SCREEN_ROWS):
+        new_line = []
+        for col in range(END_SCREEN_COLS):
+            new_line.append(BasicTile(Constants.ALL_COLORS[map[row][col]], row, col))
+        tiles.append(new_line)
+    return tiles
+
+
+def draw_end_screen(screen, tiles):  # auto create normal end screen
+    for row in range(END_SCREEN_ROWS):
+        for col in range(END_SCREEN_COLS):
+            tile = tiles[row][col]
+            pygame.transform.scale(tile.getImgSrc(), (SCALE, SCALE))
+            screen.blit(tile.getImgSrc(), (tile.getX() * Constants.SCALE, tile.getY() * Constants.SCALE))
+
+            # camera_x, camera_y = camera_origin
+            # screen.blit(tile.getImgSrc(), (tile.getX() * Constants.SCALE -
+            # camera_x, tile.getY() * Constants.SCALE - camera_y))
 
 
 def random_color_generator():

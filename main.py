@@ -22,7 +22,7 @@ def beginner_difficulty():
     mixer.music.load("music\\Geometry Dash - Level 1 -Stereo Madness (All Coins).mp3")
     mixer.music.set_volume(0.7)
     mixer.music.play()
-    return "This is the easier level"
+    return "This is the easiest level"
 
 
 def advanced_difficulty():
@@ -81,10 +81,12 @@ pygame.init()
 clock = pygame.time.Clock()
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
 screen = pygame.display.set_mode(screen_size)
-pygame.display.set_caption("Adventure_game")
+pygame.display.set_caption("Coby's Adventure")
 pygame.display.flip()
 
 map = Map()
+ai = Agent.Agent(map, screen)
+
 # map.add_furniture("Chandelier")
 # map.add_furniture("Mushroom")
 # create_shelves(10, map.get_tiles(), DEFAULT_SHELF_LENGTH, "R", DEFAULT_SHELF_HEIGHT, int(MAP_COLS // 2))
@@ -165,6 +167,11 @@ def create_options():
 def initiate_game(text: str, active_game: bool):
     player = Player(map, screen)
 
+    if map.get_difficulty() == AI_DIFFICULTY:
+        ai_mode = True
+    else:
+        ai_mode = False
+
     text_counter = 0
 
     while active_game:
@@ -176,34 +183,42 @@ def initiate_game(text: str, active_game: bool):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             _, text, _ = create_menu()
+            if map.get_difficulty() == AI_DIFFICULTY:
+                ai_mode = True
+            else:
+                ai_mode = False
 
-        if keys[pygame.K_o]:
-            create_options()
+        if not ai_mode:
+            if keys[pygame.K_o]:
+                create_options()
 
-        player.reset_just_changed()
+            player.reset_just_changed()
 
-        if keys[pygame.K_r]:
-            player.reverse_gravity()
+            if keys[pygame.K_r]:
+                player.reverse_gravity()
 
-        player.isGonnaBeKilled()
+            player.isGonnaBeKilled()
 
-        if player.killed or player.gonna_be_killed:
-            counter, text = difficulty_handler()
+            if player.killed or player.gonna_be_killed:
+                counter, text = difficulty_handler()
 
-        player.stay_alive_handler()
+            player.stay_alive_handler()
 
-        if player.character.getX() == MAP_ROWS - 2:
-            map.level_up()
+            if player.character.getX() == MAP_ROWS - 2:
+                map.level_up()
 
-        if player.character.getX() == MAP_END or keys[pygame.K_ESCAPE]:
-            player.finished_level_handler()
-            text_counter, text = difficulty_handler()
+            if player.character.getX() == MAP_END or keys[pygame.K_ESCAPE]:
+                player.finished_level_handler()
+                text_counter, text = difficulty_handler()
 
-        if not player.changeable:
-            player.changeable = player.character.onGround(map.get_tiles())
+            if not player.changeable:
+                player.changeable = player.character.onGround(map.get_tiles())
 
-        if map.get_difficulty() == END_GAME_DIFFICULTY:
-            return True
+            if map.get_difficulty() == END_GAME_DIFFICULTY:
+                return True
+
+        # else:
+        #     ai.model
 
         Camera.update()
         screen.fill((0, 0, 0))  # Clear the screen, add another layout
@@ -217,18 +232,37 @@ rects, text, run = create_menu()
 finished = initiate_game(text, run)
 
 if finished:
-    screen.fill(random_color_generator())  # Clear the screen, add another layout
+    end_screen = generate_end_screen()
+    end_screen_tiles = generate_tiles_end_screen(end_screen)
+    draw_end_screen(screen, end_screen_tiles)
     add_text(screen, "Well played, you won!", (0, 0, 0), 100, 100)
+    add_text(screen, "And thanks to you cuby and cuba are together again!", (0, 0, 0), 100, 135)
+
+    character_src = pygame.image.load("Characters/Character\\cube.png")
+    character_src = pygame.transform.scale(character_src, (END_SCREEN_CUBE_SCALE, END_SCREEN_CUBE_SCALE))
+    screen.blit(character_src, (END_SCREEN_FIRST_CUBE_X, END_SCREEN_FIRST_CUBE_Y))
+
+    character_src = pygame.image.load("Characters/Character\\cuba.png")
+    character_src = pygame.transform.scale(character_src, (END_SCREEN_CUBE_SCALE, END_SCREEN_CUBE_SCALE))
+    pygame.transform.flip(character_src, False, True)
+    screen.blit(character_src, (END_SCREEN_FIRST_CUBE_X + END_SCREEN_CUBE_X_SPACE, END_SCREEN_FIRST_CUBE_Y))
+
+    heart_src = pygame.image.load("Characters/Character\\heart.png")
+    heart_src = pygame.transform.scale(heart_src, (END_SCREEN_HEART_SCALE, END_SCREEN_HEART_SCALE))
+    screen.blit(heart_src, (END_SCREEN_HEART_X, END_SCREEN_HEART_Y))
+
     pygame.display.update()
+
 
 while finished:
     for event in pygame.event.get():  # close pygame
         if event.type == pygame.QUIT:
             finished = False
 
-# map.update_difficulty(AI_DIFFICULTY)
 # agent = Agent.Agent(map, screen)
-# agent.train(1000, "third.h5", "Training...")
-# agent.test(5, "third.h5", "Testing...")
+# agent.train(125, "cuby007.h5", "Training...")
+# agent.test(1, "first.h5", "Testing...")
+# agent.test(5, "second.h5", "Testing...")
+# agent.test(1, "third.h5", "Testing...")
 
 pygame.quit()

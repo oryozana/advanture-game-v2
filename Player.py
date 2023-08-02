@@ -103,16 +103,19 @@ class Player:
 
     def stay_alive_handler(self):
         if not self.killed:
+            if self.character.onGround(self.map.get_tiles()) and not (self.character.getY() == CELLING_HEIGHT or self.character.getY() == FLOOR_HEIGHT):
+                self.score += 25
+                print("On shelf")
+            if self.character.getY() == CELLING_HEIGHT or self.character.getY() == FLOOR_HEIGHT:
+                self.score -= 4
+                print("On c or f")
+
             self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map,
                                                                                                      self.camera_end,
                                                                                                      self.jumping,
                                                                                                      self.jump_counter,
                                                                                                      self.falling)
 
-            if self.character.onGround(self.map.get_tiles()) and DEFAULT_SHELF_HEIGHT - SHELF_HEIGHT_DIFF - 1 <= self.character.getY() <= DEFAULT_SHELF_HEIGHT + SHELF_HEIGHT_DIFF + 1:
-                self.score += 25
-            if self.character.getY() == CELLING_HEIGHT or self.character.getY() == FLOOR_HEIGHT:
-                self.score -= 5
             self.score += 1
         else:
             self.gonna_be_killed = False

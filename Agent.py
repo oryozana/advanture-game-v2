@@ -38,24 +38,29 @@ tf_values = {
 
 class Agent(Player):
     def __init__(self, map: Map, screen):
+        map.update_difficulty(AI_DIFFICULTY)
         super().__init__(map, screen)
 
         self.actions = [0, 1, 2]
         self.states = self.initiate_states()
 
-        self.learning_rate = 0.1
-        self.batch_size = 64
-        self.gamma = 0.95
+        self.learning_rate = 0.15
+        self.batch_size = 128
+        self.gamma = 0.85
         self.epsilon = 1
 
         self.model = self.build_model()
-        self.memory = deque(maxlen=20000)
+        self.memory = deque(maxlen=50000)
 
     def initiate_states(self):
-        states = [X_POSITION, Y_POSITION, tf_values[False], 0, tf_values[False], tf_values[True], gravity_directions["B"]]
+        states = [X_POSITION, Y_POSITION, tf_values[False], 0, tf_values[False], tf_values[True],
+                  gravity_directions["B"]]
         for row in range(10):
             for col in range(MAP_COLS):
-                states.append(tiles_values[self.map.get_tiles()[self.character.getX() + row][col].getType()])
+                if self.character.getX() + row >= MAP_ROWS:
+                    states.append(tiles_values["B"])
+                else:
+                    states.append(tiles_values[self.map.get_tiles()[self.character.getX() + row][col].getType()])
 
         return states
 
@@ -83,22 +88,13 @@ class Agent(Player):
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(len(self.states), activation='relu', input_shape=(len(self.states), )))
+        model.add(Dense(len(self.states), activation='relu', input_shape=(len(self.states),)))
 
-        model.add(Dense(128, activation='selu', input_shape=(len(self.states),)))
-        # model.add(Dense(64, activation='tanh'))
-        # model.add(Dense(32, activation='sigmoid'))
-        # model.add(Dense(16, activation='elu'))
-        # model.add(Dense(8, activation='selu'))
-
+        model.add(Dense(128, activation='selu'))
         model.add(Dense(64, activation='tanh'))
         model.add(Dense(32, activation='sigmoid'))
         model.add(Dense(16, activation='elu'))
         model.add(Dense(8, activation='selu'))
-
-        # model.add(Dense(64, activation='relu'))
-        # model.add(Dense(16, activation='relu'))
-        # model.add(Dense(8, activation='relu'))
 
         model.add(Dense(len(self.actions), activation='softmax'))
         model.compile(loss='mse', optimizer=keras.optimizers.Adam(learning_rate=self.learning_rate))
@@ -155,11 +151,12 @@ class Agent(Player):
         for i in range(n_train_episodes):
             state = self.initiate_states()
             text_counter = 0
+            self.score = 0
             done = False
 
             while not done:
                 action = self._act(state)
-                reward, done = self.step(action)
+                done = self.step(action)
 
                 Camera.update()
                 self.screen.fill((0, 0, 0))  # Clear the screen, add another layout
@@ -168,12 +165,17 @@ class Agent(Player):
                 text_counter += 1
 
                 if done:
-                    reward -= 50
+                    self.score -= 50
+                    print(self.score)
 
-                self._update_memory(state, action, reward, self.states, done)
+                self._update_memory(state, action, self.score, self.states, done)
                 state = self.states
 
             self._learn(self.batch_size)
+
+            if n_train_episodes % 20 == 0:
+                self._save_model(model_name)
+
         self._save_model(model_name)
 
     def test(self, n_test_trials, model_name, text):
@@ -186,7 +188,7 @@ class Agent(Player):
             self.death_handler()
             text_counter = 0
             done = False
-            score = 0
+            self.score = 0
 
             print("****************************************************")
             print("TRIAL ", trial)
@@ -201,11 +203,11 @@ class Agent(Player):
                 pygame.display.update()  # update the screen
                 text_counter += 1
 
-                reward, done = self.step(action)
-                score += 1
+                done = self.step(action)
                 if done:
-                    print("-------------------------------------------------Trial {}#, Score: {}".format(trial, score))
-            rewards.append(score)
+                    print("-------------------------------------------------Trial {}#, Score: {}".format(trial,
+                                                                                                         self.score))
+            rewards.append(self.score)
         print("Score over time: " + str(sum(rewards) / n_test_trials))  # optional
         return rewards
 
@@ -220,26 +222,32 @@ class Agent(Player):
         # Perform the action in the game
         if action == "jump" or action == 0:
             self.jumping, self.jump_counter = self.character.jump(self.map, self.jumping, self.jump_counter)
+            self.score -= 3
 
         elif action == "reverse_gravity" or action == 1:
             self.reverse_gravity()
+            self.score += 3
 
-        if action != "none":
-            self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map, self.camera_end, self.jumping, self.jump_counter, self.falling)
+        self.isGonnaBeKilled()
+        if not self.killed:
+            self.stay_alive_handler()
+        # self.camera_end, self.jumping, self.jump_counter, self.falling = self.character.movement(self.map,
+        # self.camera_end, self.jumping, self.jump_counter, self.falling)
 
         # Get the updated game state
         self.update_states()
 
         # Calculate the reward
         # print(self.map.get_tiles())
-        reward = rewards[self.map.get_tiles()[self.character.getX()][self.character.getY()].getType()]
+        # reward = rewards[self.map.get_tiles()[self.character.getX()][self.character.getY()].getType()]
 
         # Check if the game is over
         self.isGonnaBeKilled()
-        done = self.killed or self.gonna_be_killed or self.character.getX() == MAP_END
+        done = self.killed or self.character.getX() == MAP_END
+
         if self.character.getX() == MAP_END:
             self.score += 500
 
         # Return the new state, reward, and done flag
         self.update_states()
-        return reward, done
+        return done
